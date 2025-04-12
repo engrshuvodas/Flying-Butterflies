@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Garden with Butterflies</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #87CEEB;
+    }
+    h1 {
+      position: absolute;
+      top: 30px;
+      width: 100%;
+      text-align: center;
+      font-size: 48px;
+      color: white;
+      text-shadow: 2px 2px 6px #000;
+      z-index: 10;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Butterflies in Garden</h1>
+
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    // Create scene, camera, renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Add light
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    scene.add(light);
+
+    // Add grass floor
+    const groundTexture = new THREE.TextureLoader().load('https://i.ibb.co/9n3XfPf/grass.jpg'); // Grass image
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(25, 25);
+    const groundMaterial = new THREE.MeshLambertMaterial({ map: groundTexture });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // Sky color
+    scene.background = new THREE.Color(0x87CEEB);
+
+    // Butterfly texture
+    const butterflyTexture = new THREE.TextureLoader().load('https://i.ibb.co/2McRMkG/butterfly.png');
+
+    const butterflies = [];
+
+    for (let i = 0; i < 40; i++) {
+      const butterflyMaterial = new THREE.MeshBasicMaterial({
+        map: butterflyTexture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const butterfly = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), butterflyMaterial);
+      butterfly.position.set(
+        (Math.random() - 0.5) * 100,
+        Math.random() * 20 + 2,
+        (Math.random() - 0.5) * 100
+      );
+      scene.add(butterfly);
+      butterflies.push(butterfly);
+    }
+
+    camera.position.set(0, 10, 20);
+    camera.lookAt(0, 5, 0);
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      butterflies.forEach(b => {
+        b.rotation.y += 0.02;
+        b.rotation.z += 0.01;
+        b.position.y += Math.sin(Date.now() * 0.001 + b.position.x) * 0.02;
+        b.position.x += Math.cos(Date.now() * 0.001 + b.position.y) * 0.01;
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Make responsive
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
